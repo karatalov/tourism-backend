@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String      @id @default(uuid())
+  review      Review[]
+  username    String      @unique
+  email       String      @unique
+  password    String      
+  googleId    String?     @unique
+  twitterId   String?     @unique
+  facebookId  String?     @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Tour {
+  id          String        @id @default(uuid())
+  review      TourReview[]
+  name        String
+  price       Int
+  description String
+  city        String
+  category    String
+  date        String
+  cars        Car[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model TourReview {
+  id          String     @id @default(uuid())
+  tourId      String
+  tour        Tour       @relation(fields: [tourId], references: [id])
+  rating      Int
+  comment     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Car {
+  id          String       @id @default(uuid())
+  review      CarReview[]
+  tourId      String
+  tour        Tour         @relation(fields: [tourId], references: [id])
+  model       String
+  price       Int
+  capacity    Int
+  drive       String
+  year        Int
+  places      Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model CarReview {
+  id          String     @id @default(uuid())
+  carId       String
+  car         Car        @relation(fields: [carId], references: [id])
+  rating      Int
+  comment     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Review {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  rating      Int
+  comment     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
