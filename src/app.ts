@@ -1,9 +1,20 @@
 import 'dotenv/config'
 import express from 'express'
+import cors from 'cors'
 import globalRouter from './router'
 
 const buildServer = () => {
 	const server = express()
+
+	server.use(
+		cors({
+			origin: process.env.FRONTEND_URL || '*',
+			credentials: true,
+			methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+			allowedHeaders: ['Content-Type', 'Authorization'],
+		})
+	)
+
 	server.use(express.json())
 
 	server.get('/', (req, res) => {
