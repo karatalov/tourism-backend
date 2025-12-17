@@ -8,14 +8,16 @@
 		"dev": "nodemon --exec ts-node src/index.ts"
 	},
 	"dependencies": {
-		"express": "^5.1.0",
-		"pg": "^8.16.3",
-		"dotenv": "^17.2.3",
-		"bcrypt": "^6.0.0",
-		"jsonwebtoken": "^9.0.2",
+		"@prisma/adapter-pg": "^7.0.1",
 		"@prisma/client": "^7.0.1",
-		"prisma": "^7.0.1",
-		"@prisma/adapter-pg": "^7.0.1"
+		"@types/cors": "^2.8.19",
+		"bcrypt": "^6.0.0",
+		"cors": "^2.8.5",
+		"dotenv": "^17.2.3",
+		"express": "^5.1.0",
+		"jsonwebtoken": "^9.0.2",
+		"pg": "^8.16.3",
+		"prisma": "^7.0.1"
 	},
 	"devDependencies": {
 		"@types/express": "^5.0.5",
