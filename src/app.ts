@@ -5,13 +5,23 @@ import globalRouter from './router'
 const buildServer = () => {
 	const server = express()
 	server.use(express.json())
+
 	server.get('/', (req, res) => {
 		res.status(200).json({
 			success: true,
-			message: 'Server runned successful',
+			message: '🏔️ Tourism API v1 ThreeX',
+			endpoints: {
+				auth: '/api/v1/auth',
+				tours: '/api/v1/tours',
+				cars: '/api/v1/cars',
+				reviews: '/api/v1/reviews',
+				users: '/api/v1/users',
+			},
 		})
 	})
+
 	server.use('/api/v1', globalRouter)
+
 	return server
 }
 

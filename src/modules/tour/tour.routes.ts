@@ -1,9 +1,19 @@
 import { Router } from 'express'
-import tourControllers from './tour.controllers'
+import {
+	getAllTours,
+	getTourById,
+	createTour,
+	updateTour,
+	deleteTour,
+} from './tour.controllers'
+import { authMiddleware } from '../../middleware/auth'
 
 const router = Router()
 
-router.get('/tours', tourControllers.getAllTour)
-router.post('/create', tourControllers.createTour)
+router.get('/', getAllTours)
+router.get('/:id', getTourById)
+router.post('/', authMiddleware, createTour)
+router.put('/:id', authMiddleware, updateTour)
+router.delete('/:id', authMiddleware, deleteTour)
 
 export default router

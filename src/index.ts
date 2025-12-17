@@ -9,8 +9,8 @@ const startServer = () => {
 			host: '0.0.0.0',
 		}),
 			() => {
-				console.log(new Date().toLocaleString())
-				console.log(`Server runned in http://localhost:${PORT}`)
+				console.log(`🚀 Сервер запущен на http://localhost:${PORT}`)
+				console.log(`📚 API документация: http://localhost:${PORT}/api/v1`)
 			}
 	} catch (error) {
 		console.log(`Server crushed ${error}`)
