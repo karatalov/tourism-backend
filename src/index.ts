@@ -1,19 +1,13 @@
-import buildServer from './app'
+import buildServer from "./app";
 
 const startServer = () => {
-	const server = buildServer()
-	const PORT = process.env.PORT || 3000
-	try {
-		server.listen({
-			port: PORT,
-			host: '0.0.0.0',
-		}),
-			() => {
-				console.log(`🚀 Сервер запущен на http://localhost:${PORT}`)
-				console.log(`📚 API документация: http://localhost:${PORT}/api/v1`)
-			}
-	} catch (error) {
-		console.log(`Server crushed ${error}`)
-	}
-}
-startServer()
+  const server = buildServer();
+  const PORT = process.env.PORT || 3000;
+
+  server.listen({ port: PORT, host: "0.0.0.0" }, () => {
+    console.log(`Сервер запущен по адресу: http://localhost:${PORT}`);
+    console.log(`API документация доступна по адресу: http://localhost:${PORT}/docs`);
+  });
+};
+
+startServer();

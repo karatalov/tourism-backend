@@ -1,332 +1,319 @@
-import { Request, Response } from 'express'
-import prisma from '../../config/prisma'
-import { Prisma } from '@prisma/client'
+import { Request, Response } from "express";
+import prisma from "../../config/prisma";
+import { Prisma } from "@prisma/client";
+import { t } from "../../locale/i18n/settings";
 
 const toNumber = (value: any, fallback: number = 0): number => {
-	const num = Number(value)
-	return isNaN(num) ? fallback : num
-}
+  const num = Number(value);
+  return isNaN(num) ? fallback : num;
+};
 
 export const getAllCars = async (req: Request, res: Response) => {
-	try {
-		const { brand, minPrice, maxPrice, year, transmission } = req.query as {
-			[key: string]: string | undefined
-		}
+  try {
+    const { brand, minPrice, maxPrice, year, transmission } = req.query as {
+      [key: string]: string | undefined;
+    };
 
-		const where: Prisma.CarWhereInput = {}
+    const where: Prisma.CarWhereInput = {};
 
-		if (brand) where.brand = brand
-		if (transmission) where.transmission = transmission
-		if (year) where.year = toNumber(year)
+    if (brand) where.brand = brand;
+    if (transmission) where.transmission = transmission;
+    if (year) where.year = toNumber(year);
 
-		if (minPrice || maxPrice) {
-			where.price = {}
-			if (minPrice) where.price.gte = toNumber(minPrice)
-			if (maxPrice) where.price.lte = toNumber(maxPrice)
-		}
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = toNumber(minPrice);
+      if (maxPrice) where.price.lte = toNumber(maxPrice);
+    }
 
-		const cars = await prisma.car.findMany({
-			where,
-			include: {
-				tour: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				reviews: {
-					include: {
-						user: {
-							select: {
-								id: true,
-								username: true,
-								avatar: true,
-							},
-						},
-					},
-				},
-				_count: {
-					select: {
-						favorites: true,
-					},
-				},
-			},
-		})
+    const cars = await prisma.car.findMany({
+      where,
+      include: {
+        tour: {
+          select: { id: true, name: true },
+        },
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: { favorites: true },
+        },
+      },
+    });
 
-		const carsWithRating = cars.map((car) => {
-			const avgRating =
-				car.reviews.length > 0
-					? car.reviews.reduce((sum, r) => sum + r.rating, 0) /
-					  car.reviews.length
-					: 0
+    const carsWithRating = cars.map((car) => {
+      const avgRating =
+        car.reviews.length > 0
+          ? car.reviews.reduce((sum, r) => sum + r.rating, 0) /
+            car.reviews.length
+          : 0;
 
-			return {
-				...car,
-				avgRating: Number(avgRating.toFixed(1)),
-			}
-		})
+      return {
+        ...car,
+        avgRating: Number(avgRating.toFixed(1)),
+      };
+    });
 
-		res.status(200).json({
-			success: true,
-			count: carsWithRating.length,
-			cars: carsWithRating,
-		})
-	} catch (error) {
-		console.error('getAllCars error:', error)
-		res.status(500).json({
-			success: false,
-			message: 'Ошибка при получении машин',
-		})
-	}
-}
+    res.status(200).json({
+      success: true,
+      count: carsWithRating.length,
+      cars: carsWithRating,
+    });
+  } catch (error) {
+    console.error("getAllCars error:", error);
+    res.status(500).json({
+      success: false,
+      message: t("car.get_all_error", req.lang),
+    });
+  }
+};
 
 export const getCarById = async (req: Request, res: Response) => {
-	try {
-		const { id } = req.params
+  try {
+    const { id } = req.params;
 
-		if (!id) {
-			return res.status(400).json({
-				success: false,
-				message: 'ID машины обязателен',
-			})
-		}
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: t("car.id_required", req.lang),
+      });
+    }
 
-		const car = await prisma.car.findUnique({
-			where: { id },
-			include: {
-				tour: {
-					select: {
-						id: true,
-						name: true,
-						city: true,
-					},
-				},
-				reviews: {
-					include: {
-						user: {
-							select: {
-								id: true,
-								username: true,
-								avatar: true,
-							},
-						},
-					},
-					orderBy: { createdAt: 'desc' },
-				},
-				_count: {
-					select: {
-						favorites: true,
-					},
-				},
-			},
-		})
+    const car = await prisma.car.findUnique({
+      where: { id },
+      include: {
+        tour: {
+          select: { id: true, name: true, city: true },
+        },
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                avatar: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        _count: {
+          select: { favorites: true },
+        },
+      },
+    });
 
-		if (!car) {
-			return res.status(404).json({
-				success: false,
-				message: 'Машина не найдена',
-			})
-		}
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: t("car.not_found", req.lang),
+      });
+    }
 
-		const avgRating =
-			car.reviews.length > 0
-				? car.reviews.reduce((sum, r) => sum + r.rating, 0) / car.reviews.length
-				: 0
+    const avgRating =
+      car.reviews.length > 0
+        ? car.reviews.reduce((sum, r) => sum + r.rating, 0) / car.reviews.length
+        : 0;
 
-		res.status(200).json({
-			success: true,
-			car: {
-				...car,
-				avgRating: Number(avgRating.toFixed(1)),
-			},
-		})
-	} catch (error) {
-		console.error('getCarById error:', error)
-		res.status(500).json({
-			success: false,
-			message: 'Ошибка при получении машины',
-		})
-	}
-}
+    res.status(200).json({
+      success: true,
+      car: {
+        ...car,
+        avgRating: Number(avgRating.toFixed(1)),
+      },
+    });
+  } catch (error) {
+    console.error("getCarById error:", error);
+    res.status(500).json({
+      success: false,
+      message: t("car.get_one_error", req.lang),
+    });
+  }
+};
 
 export const createCar = async (req: Request, res: Response) => {
-	try {
-		const {
-			tourId,
-			model,
-			brand,
-			price,
-			capacity,
-			drive,
-			year,
-			places,
-			transmission,
-			fuelType,
-			images,
-		} = req.body
+  try {
+    const {
+      tourId,
+      model,
+      brand,
+      price,
+      capacity,
+      drive,
+      year,
+      places,
+      transmission,
+      fuelType,
+      images,
+    } = req.body;
 
-		if (
-			!model ||
-			!brand ||
-			!price ||
-			!capacity ||
-			!drive ||
-			!year ||
-			!places ||
-			!transmission ||
-			!fuelType
-		) {
-			return res.status(400).json({
-				success: false,
-				message: 'Заполните все обязательные поля',
-			})
-		}
+    if (
+      !model ||
+      !brand ||
+      !price ||
+      !capacity ||
+      !drive ||
+      !year ||
+      !places ||
+      !transmission ||
+      !fuelType
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: t("car.fill_required_fields", req.lang),
+      });
+    }
 
-		const car = await prisma.car.create({
-			data: {
-				tourId: tourId || null,
-				model: String(model),
-				brand: String(brand),
-				price: Number(price),
-				capacity: Number(capacity),
-				drive: String(drive),
-				year: Number(year),
-				places: Number(places),
-				transmission: String(transmission),
-				fuelType: String(fuelType),
-				images: Array.isArray(images) ? images : images ? [images] : [],
-			},
-		})
+    const car = await prisma.car.create({
+      data: {
+        tourId: tourId || null,
+        model: String(model),
+        brand: String(brand),
+        price: Number(price),
+        capacity: Number(capacity),
+        drive: String(drive),
+        year: Number(year),
+        places: Number(places),
+        transmission: String(transmission),
+        fuelType: String(fuelType),
+        images: Array.isArray(images) ? images : images ? [images] : [],
+      },
+    });
 
-		res.status(201).json({
-			success: true,
-			message: 'Машина успешно добавлена',
-			car,
-		})
-	} catch (error: any) {
-		console.error('createCar error:', error)
-		if (error.code === 'P2003') {
-			return res.status(400).json({
-				success: false,
-				message: 'Неверный tourId — такой тур не существует',
-			})
-		}
-		res.status(500).json({
-			success: false,
-			message: 'Ошибка при создании машины',
-		})
-	}
-}
+    res.status(201).json({
+      success: true,
+      message: t("car.created", req.lang),
+      car,
+    });
+  } catch (error: any) {
+    console.error("createCar error:", error);
+
+    if (error.code === "P2003") {
+      return res.status(400).json({
+        success: false,
+        message: t("car.invalid_tour", req.lang),
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: t("car.create_error", req.lang),
+    });
+  }
+};
 
 export const updateCar = async (req: Request, res: Response) => {
-	try {
-		const { id } = req.params
-		if (!id) {
-			return res.status(400).json({
-				success: false,
-				message: 'ID машины обязателен',
-			})
-		}
+  try {
+    const { id } = req.params;
 
-		const data = req.body
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: t("car.id_required", req.lang),
+      });
+    }
 
-		const allowedFields = [
-			'model',
-			'brand',
-			'price',
-			'capacity',
-			'drive',
-			'year',
-			'places',
-			'transmission',
-			'fuelType',
-			'images',
-			'tourId',
-		] as const
+    const data = req.body;
 
-		const updateData: Prisma.CarUpdateInput = {}
+    const allowedFields = [
+      "model",
+      "brand",
+      "price",
+      "capacity",
+      "drive",
+      "year",
+      "places",
+      "transmission",
+      "fuelType",
+      "images",
+      "tourId",
+    ] as const;
 
-		for (const field of allowedFields) {
-			if (data[field] !== undefined && field !== 'tourId') {
-				updateData[field] =
-					field === 'price' ||
-					field === 'capacity' ||
-					field === 'year' ||
-					field === 'places'
-						? Number(data[field])
-						: data[field]
-			}
-		}
+    const updateData: Prisma.CarUpdateInput = {};
 
-		if (data.tourId !== undefined) {
-			if (data.tourId === null) {
-				updateData.tour = { disconnect: true }
-			} else if (typeof data.tourId === 'string' && data.tourId.trim()) {
-				updateData.tour = { connect: { id: data.tourId } }
-			}
-		}
+    for (const field of allowedFields) {
+      if (data[field] !== undefined && field !== "tourId") {
+        updateData[field] = ["price", "capacity", "year", "places"].includes(
+          field
+        )
+          ? Number(data[field])
+          : data[field];
+      }
+    }
 
-		const car = await prisma.car.update({
-			where: { id },
-			data: updateData,
-		})
+    if (data.tourId !== undefined) {
+      if (data.tourId === null) {
+        updateData.tour = { disconnect: true };
+      } else if (typeof data.tourId === "string" && data.tourId.trim()) {
+        updateData.tour = { connect: { id: data.tourId } };
+      }
+    }
 
-		res.status(200).json({
-			success: true,
-			message: 'Машина успешно обновлена',
-			car,
-		})
-	} catch (error: any) {
-		console.error('updateCar error:', error)
+    const car = await prisma.car.update({
+      where: { id },
+      data: updateData,
+    });
 
-		if (error.code === 'P2025') {
-			return res
-				.status(404)
-				.json({ success: false, message: 'Машина не найдена' })
-		}
-		if (error.code === 'P2025' && error.meta?.cause?.includes('tour')) {
-			return res.status(400).json({ success: false, message: 'Тур не найден' })
-		}
+    res.status(200).json({
+      success: true,
+      message: t("car.updated", req.lang),
+      car,
+    });
+  } catch (error: any) {
+    console.error("updateCar error:", error);
 
-		res.status(500).json({
-			success: false,
-			message: 'Ошибка при обновлении машины',
-		})
-	}
-}
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        success: false,
+        message: t("car.not_found", req.lang),
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: t("car.update_error", req.lang),
+    });
+  }
+};
 
 export const deleteCar = async (req: Request, res: Response) => {
-	try {
-		const { id } = req.params
+  try {
+    const { id } = req.params;
 
-		if (!id) {
-			return res.status(400).json({
-				success: false,
-				message: 'ID машины обязателен',
-			})
-		}
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: t("car.id_required", req.lang),
+      });
+    }
 
-		await prisma.car.delete({
-			where: { id },
-		})
+    await prisma.car.delete({ where: { id } });
 
-		res.status(200).json({
-			success: true,
-			message: 'Машина успешно удалена',
-		})
-	} catch (error: any) {
-		console.error('deleteCar error:', error)
+    res.status(200).json({
+      success: true,
+      message: t("car.deleted", req.lang),
+    });
+  } catch (error: any) {
+    console.error("deleteCar error:", error);
 
-		if (error.code === 'P2025') {
-			return res.status(404).json({
-				success: false,
-				message: 'Машина не найдена',
-			})
-		}
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        success: false,
+        message: t("car.not_found", req.lang),
+      });
+    }
 
-		res.status(500).json({
-			success: false,
-			message: 'Ошибка при удалении машины',
-		})
-	}
-}
+    res.status(500).json({
+      success: false,
+      message: t("car.delete_error", req.lang),
+    });
+  }
+};
