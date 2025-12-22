@@ -1,0 +1,342 @@
+openapi: 3.0.3
+
+info:
+  title: Tourism API v1
+  version: 1.0.0
+  description: API documentation for Tourism backend
+
+servers:
+  - url: http://localhost:5000/{lang}/api/v1
+    variables:
+      lang:
+        default: ru
+        enum:
+          - ru
+          - en
+          - ky
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ---------------- AUTH ----------------
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Registered
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Logged in
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current user
+
+  # ---------------- TOURS ----------------
+  /tours:
+    get:
+      tags: [Tours]
+      summary: Get all tours
+      responses:
+        "200":
+          description: List of tours
+    post:
+      tags: [Tours]
+      summary: Create tour
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: Created
+
+  /tours/{id}:
+    get:
+      tags: [Tours]
+      summary: Get tour by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Tour
+    put:
+      tags: [Tours]
+      summary: Update tour
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Tours]
+      summary: Delete tour
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------- CARS ----------------
+  /cars:
+    get:
+      tags: [Cars]
+      summary: Get all cars
+      responses:
+        "200":
+          description: List of cars
+    post:
+      tags: [Cars]
+      summary: Create car
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: Created
+
+  /cars/{id}:
+    get:
+      tags: [Cars]
+      summary: Get car by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Car
+    put:
+      tags: [Cars]
+      summary: Update car
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Cars]
+      summary: Delete car
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------- REVIEWS ----------------
+  /reviews/tour/{tourId}:
+    post:
+      tags: [Reviews]
+      summary: Add tour review
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tourId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Created
+
+  /reviews/car/{carId}:
+    post:
+      tags: [Reviews]
+      summary: Add car review
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Created
+
+  /reviews/site:
+    get:
+      tags: [Reviews]
+      summary: Get site reviews
+      responses:
+        "200":
+          description: Reviews
+    post:
+      tags: [Reviews]
+      summary: Add site review
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: Created
+
+  /reviews/site/{id}:
+    delete:
+      tags: [Reviews]
+      summary: Delete site review
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------- FAVORITES ----------------
+  /users/favorites/tours:
+    get:
+      tags: [Favorites]
+      summary: Get favorite tours
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Favorites
+
+  /users/favorites/tours/{tourId}:
+    post:
+      tags: [Favorites]
+      summary: Add favorite tour
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tourId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Added
+    delete:
+      tags: [Favorites]
+      summary: Remove favorite tour
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tourId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  /users/favorites/cars:
+    get:
+      tags: [Favorites]
+      summary: Get favorite cars
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Favorites
+
+  /users/favorites/cars/{carId}:
+    post:
+      tags: [Favorites]
+      summary: Add favorite car
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Added
+    delete:
+      tags: [Favorites]
+      summary: Remove favorite car
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed

@@ -1,39 +1,38 @@
-import 'dotenv/config'
-import express from 'express'
-import cors from 'cors'
-import globalRouter from './router'
+import "dotenv/config";
+import express, { Express } from "express";
+import cors from "cors";
+import session from "express-session";
 
-const buildServer = () => {
-	const server = express()
+import globalRouter from "./router";
+import { langFromPathMiddleware } from "./middleware/langFromPath";
+import { swaggerServe, swaggerSetup } from "./swagger";
 
-	server.use(
-		cors({
-			origin: process.env.FRONTEND_URL || '*',
-			credentials: true,
-			methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-			allowedHeaders: ['Content-Type', 'Authorization'],
-		})
-	)
+const buildServer = (): Express => {
+  const server = express();
 
-	server.use(express.json())
+  server.use(cors());
+  server.use(express.json());
 
-	server.get('/', (req, res) => {
-		res.status(200).json({
-			success: true,
-			message: '🏔️ Tourism API v1 ThreeX',
-			endpoints: {
-				auth: '/api/v1/auth',
-				tours: '/api/v1/tours',
-				cars: '/api/v1/cars',
-				reviews: '/api/v1/reviews',
-				users: '/api/v1/users',
-			},
-		})
-	})
+  server.use(
+    session({
+      secret: process.env.ADMIN_COOKIE_SECRET!,
+      resave: false,
+      saveUninitialized: false,
+    })
+  );
 
-	server.use('/api/v1', globalRouter)
+  server.get("/", (_, res) => {
+    res.json({
+      success: true,
+      message: "🏔️ Tourism API v1 ThreeX",
+      examples: ["/ru/api/v1/auth", "/en/api/v1/tours", "/ky/api/v1/cars"],
+    });
+  });
 
-	return server
-}
+  server.use("/:lang/api/v1", langFromPathMiddleware, globalRouter);
+  server.use("/docs", swaggerServe, swaggerSetup);
 
-export default buildServer
+  return server;
+};
+
+export default buildServer;
