@@ -6,7 +6,7 @@ info:
   description: API documentation for Tourism backend
 
 servers:
-  - url: http://localhost:5000/{lang}/api/v1
+  - url: https://tourism-backend-laq8.onrender.com/{lang}/api/v1
     variables:
       lang:
         default: ru
