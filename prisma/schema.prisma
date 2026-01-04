@@ -50,7 +50,7 @@ model Car {
   id           String        @id @default(uuid())
   tourId       String?
   tour         Tour?         @relation(fields: [tourId], references: [id], onDelete: SetNull)
-  category     String
+  category     String        @default("passenger")
   model        String
   status       String        @default("available")
   city         String        @default("Бишкек")
