@@ -136,6 +136,255 @@ paths:
         "204":
           description: Deleted
 
+
+  /tours/{tourId}/days:
+    get:
+      tags: [Tour Days]
+      summary: Get tour program (days)
+      parameters:
+        - name: tourId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of tour days
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TourDay"
+
+    post:
+      tags: [Tour Days]
+      summary: Create tour day
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tourId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - dayNumber
+              properties:
+                dayNumber:
+                  type: integer
+                  example: 1
+                title:
+                  type: string
+                  example: Arrival and acclimatization
+      responses:
+        "201":
+          description: Created
+
+  /days/{dayId}:
+    put:
+      tags: [Tour Days]
+      summary: Update tour day
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dayNumber:
+                  type: integer
+                title:
+                  type: string
+      responses:
+        "200":
+          description: Updated
+
+    delete:
+      tags: [Tour Days]
+      summary: Delete tour day
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+
+  /days/{dayId}/items:
+    get:
+      tags: [Tour Day Items]
+      summary: Get items of tour day
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of tour day items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TourDayItem"
+
+    post:
+      tags: [Tour Day Items]
+      summary: Create tour day item
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: dayId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+              properties:
+                title:
+                  type: string
+                  example: Departure from Bishkek
+                description:
+                  type: string
+                  example: Morning departure and briefing
+                images:
+                  type: array
+                  items:
+                    type: string
+                location:
+                  type: string
+                pointStart:
+                  type: string
+                pointEnd:
+                  type: string
+                price:
+                  type: integer
+                  example: 100
+                duration:
+                  type: string
+                  example: "2 hours"
+                complexity:
+                  type: string
+                  example: easy
+      responses:
+        "201":
+          description: Created
+
+  /items/{itemId}:
+    put:
+      tags: [Tour Day Items]
+      summary: Update tour day item
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                location:
+                  type: string
+                pointStart:
+                  type: string
+                pointEnd:
+                  type: string
+                price:
+                  type: integer
+                duration:
+                  type: string
+                complexity:
+                  type: string
+      responses:
+        "200":
+          description: Updated
+
+    delete:
+      tags: [Tour Day Items]
+      summary: Delete tour day item
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+      # ---------------- TOUR PROGRAM ----------------
+
+  /tours/{tourId}/program:
+    get:
+      tags: [Tour Program]
+      summary: Get full tour program (days with items)
+      parameters:
+        - name: tourId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tour program
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tourId:
+                    type: string
+                  days:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TourDay"
+
   # ---------------- CARS ----------------
   /cars:
     get:

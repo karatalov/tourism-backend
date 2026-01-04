@@ -7,136 +7,192 @@ datasource db {
 }
 
 model User {
-  id            String          @id @default(uuid())
-  username      String          @unique
-  email         String          @unique
+  id            String         @id @default(uuid())
+  username      String         @unique
+  email         String         @unique
   password      String
   avatar        String?
-  googleId      String?         @unique
-  twitterId     String?         @unique
-  facebookId    String?         @unique
-  
+  googleId      String?        @unique
+  twitterId     String?        @unique
+  facebookId    String?        @unique
   tourReviews   TourReview[]
   carReviews    CarReview[]
   siteReviews   SiteReview[]
-  
   favoriteTours FavoriteTour[]
   favoriteCars  FavoriteCar[]
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Tour {
-  id            String          @id @default(uuid())
-  name          String
-  price         Int
-  description   String          @db.Text
-  city          String
-  category      String
-  date          String
-  images        String[]
-  duration      Int
-  maxPeople     Int
-  
-  cars          Car[]
-  reviews       TourReview[]
-  favorites     FavoriteTour[]
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  price       Int
+  description String   @db.Text
+  city        String
+  category    String
+  date        String
+  images      String[]
+  duration    Int
+  maxPeople   Int
+
+  cars      Car[]
+  days      TourDay[]
+  reviews   TourReview[]
+  favorites FavoriteTour[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  programItems ProgramItem[]
 }
 
 model Car {
-  id            String          @id @default(uuid())
-  tourId        String?        
-  tour          Tour?           @relation(fields: [tourId], references: [id], onDelete: SetNull)
-  
-  model         String
-  brand         String
-  price         Int            
-  capacity      Int             
-  drive         String         
-  year          Int
-  places        Int
-  transmission  String          
-  fuelType      String          
-  images        String[]
-  
-  reviews       CarReview[]
-  favorites     FavoriteCar[]
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id           String        @id @default(uuid())
+  tourId       String?
+  tour         Tour?         @relation(fields: [tourId], references: [id], onDelete: SetNull)
+  category     String
+  model        String
+  status       String        @default("available")
+  city         String        @default("Бишкек")
+  brand        String
+  price        Int
+  capacity     Float
+  drive        String
+  year         Int
+  places       Int
+  transmission String
+  fuelType     String
+  images       String[]
+  reviews      CarReview[]
+  favorites    FavoriteCar[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model TourReview {
-  id            String          @id @default(uuid())
+  id     String @id @default(uuid())
+  tourId String
+  userId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating  Int
+  comment String   @db.Text
+  images  String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tourId, userId])
+}
+
+model TourDay {
+  id     String @id @default(uuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  dayNumber Int
+  title     String?
+  items     TourDayItem[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([tourId, dayNumber])
+}
+
+model TourDayItem {
+  id    String  @id @default(uuid())
+  dayId String
+  day   TourDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String   @db.Text
+  images      String[]
+
+  pointStart String?
+  pointEnd   String?
+  location   String?
+
+  price      Int?
+  duration   String?
+  complexity String?
+
+  createdAt DateTime @default(now())
+}
+
+model ProgramItem {
+  id            String   @id @default(uuid())
   tourId        String
-  userId        String
-  tour          Tour            @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  rating        Int            
-  comment       String          @db.Text
-  images        String[]        
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  
-  @@unique([tourId, userId])    
+  tour          Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  images        String[]
+  tourAgentLogo String
+  likes         Int      @default(0)
+  tourAgent     String
+  location      String
+  day           Int
+  pointStart    String
+  pointEnd      String
+  lengthDay     String
+  price         Int
+  complexity    String
+  groupSizeMin  Int
+  groupSizeMax  Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model CarReview {
-  id            String          @id @default(uuid())
-  carId         String
-  userId        String
-  car           Car             @relation(fields: [carId], references: [id], onDelete: Cascade)
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  rating        Int           
-  comment       String          @db.Text
-  images        String[]
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  
+  id     String @id @default(uuid())
+  carId  String
+  userId String
+  car    Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating  Int
+  comment String   @db.Text
+  images  String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([carId, userId])
 }
 
 model SiteReview {
-  id            String          @id @default(uuid())
-  userId        String
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  rating        Int             
-  comment       String          @db.Text
-  category      String          
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating   Int
+  comment  String @db.Text
+  category String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FavoriteTour {
-  id            String          @id @default(uuid())
-  userId        String
-  tourId        String
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tour          Tour            @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime        @default(now())
-  
+  id     String @id @default(uuid())
+  userId String
+  tourId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@unique([userId, tourId])
 }
 
 model FavoriteCar {
-  id            String          @id @default(uuid())
-  userId        String
-  carId         String
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  car           Car             @relation(fields: [carId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime        @default(now())
-  
+  id     String @id @default(uuid())
+  userId String
+  carId  String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car    Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@unique([userId, carId])
 }

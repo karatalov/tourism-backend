@@ -10,12 +10,14 @@ const toNumber = (value: any, fallback: number = 0): number => {
 
 export const getAllCars = async (req: Request, res: Response) => {
   try {
-    const { brand, minPrice, maxPrice, year, transmission } = req.query as {
-      [key: string]: string | undefined;
-    };
+    const { category, brand, minPrice, maxPrice, year, transmission } =
+      req.query as {
+        [key: string]: string | undefined;
+      };
 
     const where: Prisma.CarWhereInput = {};
 
+    if (category) where.category = category;
     if (brand) where.brand = brand;
     if (transmission) where.transmission = transmission;
     if (year) where.year = toNumber(year);
@@ -142,6 +144,7 @@ export const getCarById = async (req: Request, res: Response) => {
 export const createCar = async (req: Request, res: Response) => {
   try {
     const {
+      category,
       tourId,
       model,
       brand,
@@ -156,6 +159,7 @@ export const createCar = async (req: Request, res: Response) => {
     } = req.body;
 
     if (
+      !category ||
       !model ||
       !brand ||
       !price ||
@@ -174,6 +178,7 @@ export const createCar = async (req: Request, res: Response) => {
 
     const car = await prisma.car.create({
       data: {
+        category: String(category),
         tourId: tourId || null,
         model: String(model),
         brand: String(brand),
@@ -224,6 +229,7 @@ export const updateCar = async (req: Request, res: Response) => {
     const data = req.body;
 
     const allowedFields = [
+      "category",
       "model",
       "brand",
       "price",
